@@ -1,0 +1,1112 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Smart Contract Security Auditor - Free AI-Powered Analysis</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Fira+Code:wght@400;500&display=swap" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --bg-primary: #0d1117;
+            --bg-secondary: #161b22;
+            --bg-tertiary: #1f2937;
+            --border-color: #30363d;
+            --text-primary: #e6edf3;
+            --text-secondary: #8b949e;
+            --accent-blue: #58a6ff;
+            --critical: #ff4444;
+            --high: #ff8800;
+            --medium: #ffbb33;
+            --low: #00C851;
+            --info: #33b5e5;
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            background: var(--bg-primary);
+            color: var(--text-primary);
+            line-height: 1.6;
+        }
+
+        .header {
+            background: var(--bg-secondary);
+            border-bottom: 1px solid var(--border-color);
+            padding: 1.5rem 0;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 0 2rem;
+        }
+
+        .header-content {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+        }
+
+        .logo-icon {
+            width: 40px;
+            height: 40px;
+            background: linear-gradient(135deg, var(--accent-blue), #2ea043);
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5rem;
+        }
+
+        .logo h1 {
+            font-size: 1.5rem;
+            font-weight: 600;
+            background: linear-gradient(135deg, var(--accent-blue), #2ea043);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .badge {
+            background: rgba(88, 166, 255, 0.1);
+            color: var(--accent-blue);
+            padding: 0.25rem 0.75rem;
+            border-radius: 12px;
+            font-size: 0.75rem;
+            font-weight: 500;
+            border: 1px solid rgba(88, 166, 255, 0.2);
+        }
+
+        .main-content {
+            padding: 3rem 0;
+        }
+
+        .intro {
+            text-align: center;
+            margin-bottom: 3rem;
+        }
+
+        .intro h2 {
+            font-size: 2.5rem;
+            margin-bottom: 1rem;
+            font-weight: 700;
+        }
+
+        .intro p {
+            color: var(--text-secondary);
+            font-size: 1.125rem;
+            max-width: 700px;
+            margin: 0 auto;
+        }
+
+        .auditor-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 2rem;
+            margin-bottom: 2rem;
+        }
+
+        .editor-panel, .results-panel {
+            background: var(--bg-secondary);
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            overflow: hidden;
+        }
+
+        .panel-header {
+            padding: 1rem 1.5rem;
+            border-bottom: 1px solid var(--border-color);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background: var(--bg-tertiary);
+        }
+
+        .panel-title {
+            font-weight: 600;
+            font-size: 1rem;
+        }
+
+        .code-editor {
+            width: 100%;
+            height: 600px;
+            padding: 1.5rem;
+            background: var(--bg-primary);
+            color: var(--text-primary);
+            border: none;
+            resize: none;
+            font-family: 'Fira Code', monospace;
+            font-size: 0.875rem;
+            line-height: 1.5;
+            outline: none;
+        }
+
+        .code-editor::placeholder {
+            color: var(--text-secondary);
+        }
+
+        .analyze-btn {
+            background: linear-gradient(135deg, var(--accent-blue), #2ea043);
+            color: white;
+            border: none;
+            padding: 0.75rem 2rem;
+            border-radius: 8px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-size: 1rem;
+        }
+
+        .analyze-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 16px rgba(88, 166, 255, 0.3);
+        }
+
+        .analyze-btn:active {
+            transform: translateY(0);
+        }
+
+        .analyze-btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        .results-container {
+            padding: 1.5rem;
+            min-height: 600px;
+            max-height: 600px;
+            overflow-y: auto;
+        }
+
+        .empty-state {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100%;
+            color: var(--text-secondary);
+            text-align: center;
+        }
+
+        .empty-state-icon {
+            font-size: 4rem;
+            margin-bottom: 1rem;
+            opacity: 0.5;
+        }
+
+        .summary-cards {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1rem;
+            margin-bottom: 2rem;
+        }
+
+        .summary-card {
+            background: var(--bg-tertiary);
+            padding: 1rem;
+            border-radius: 8px;
+            border-left: 4px solid;
+        }
+
+        .summary-card.critical { border-left-color: var(--critical); }
+        .summary-card.high { border-left-color: var(--high); }
+        .summary-card.medium { border-left-color: var(--medium); }
+        .summary-card.low { border-left-color: var(--low); }
+
+        .summary-card h3 {
+            font-size: 2rem;
+            margin-bottom: 0.25rem;
+        }
+
+        .summary-card p {
+            color: var(--text-secondary);
+            font-size: 0.875rem;
+        }
+
+        .finding {
+            background: var(--bg-tertiary);
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            padding: 1.5rem;
+            margin-bottom: 1rem;
+            border-left: 4px solid;
+        }
+
+        .finding.critical { border-left-color: var(--critical); }
+        .finding.high { border-left-color: var(--high); }
+        .finding.medium { border-left-color: var(--medium); }
+        .finding.low { border-left-color: var(--low); }
+        .finding.info { border-left-color: var(--info); }
+
+        .finding-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: start;
+            margin-bottom: 1rem;
+        }
+
+        .finding-title {
+            font-weight: 600;
+            font-size: 1.125rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .severity-badge {
+            padding: 0.25rem 0.75rem;
+            border-radius: 4px;
+            font-size: 0.75rem;
+            font-weight: 600;
+            text-transform: uppercase;
+        }
+
+        .severity-badge.critical {
+            background: rgba(255, 68, 68, 0.15);
+            color: var(--critical);
+        }
+
+        .severity-badge.high {
+            background: rgba(255, 136, 0, 0.15);
+            color: var(--high);
+        }
+
+        .severity-badge.medium {
+            background: rgba(255, 187, 51, 0.15);
+            color: var(--medium);
+        }
+
+        .severity-badge.low {
+            background: rgba(0, 200, 81, 0.15);
+            color: var(--low);
+        }
+
+        .finding-description {
+            color: var(--text-secondary);
+            margin-bottom: 1rem;
+            line-height: 1.6;
+        }
+
+        .code-snippet {
+            background: var(--bg-primary);
+            border: 1px solid var(--border-color);
+            border-radius: 6px;
+            padding: 1rem;
+            margin: 0.5rem 0;
+            font-family: 'Fira Code', monospace;
+            font-size: 0.875rem;
+            overflow-x: auto;
+        }
+
+        .recommendation {
+            background: rgba(88, 166, 255, 0.1);
+            border-left: 3px solid var(--accent-blue);
+            padding: 1rem;
+            margin-top: 1rem;
+            border-radius: 4px;
+        }
+
+        .recommendation strong {
+            color: var(--accent-blue);
+            display: block;
+            margin-bottom: 0.5rem;
+        }
+
+        .line-number {
+            color: var(--text-secondary);
+            font-weight: 600;
+            font-size: 0.875rem;
+        }
+
+        .examples-section {
+            margin-top: 3rem;
+            padding: 2rem;
+            background: var(--bg-secondary);
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+        }
+
+        .examples-section h3 {
+            margin-bottom: 1rem;
+        }
+
+        .example-buttons {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.75rem;
+        }
+
+        .example-btn {
+            background: var(--bg-tertiary);
+            border: 1px solid var(--border-color);
+            color: var(--text-primary);
+            padding: 0.5rem 1rem;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .example-btn:hover {
+            background: var(--bg-primary);
+            border-color: var(--accent-blue);
+        }
+
+        .loader {
+            display: inline-block;
+            width: 16px;
+            height: 16px;
+            border: 2px solid rgba(255, 255, 255, 0.3);
+            border-radius: 50%;
+            border-top-color: white;
+            animation: spin 0.8s linear infinite;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        @media (max-width: 968px) {
+            .auditor-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .stats-bar {
+            display: flex;
+            gap: 0.5rem;
+            margin-top: 0.5rem;
+        }
+
+        .stat-item {
+            font-size: 0.875rem;
+            color: var(--text-secondary);
+        }
+
+        .footer {
+            text-align: center;
+            padding: 2rem;
+            color: var(--text-secondary);
+            border-top: 1px solid var(--border-color);
+            margin-top: 4rem;
+        }
+    </style>
+</head>
+<body>
+    <header class="header">
+        <div class="container">
+            <div class="header-content">
+                <div class="logo">
+                    <div class="logo-icon">🛡️</div>
+                    <h1>Smart Contract Auditor</h1>
+                </div>
+                <div class="badge">FREE & OPEN SOURCE</div>
+            </div>
+        </div>
+    </header>
+
+    <main class="main-content">
+        <div class="container">
+            <div class="intro">
+                <h2>AI-Powered Smart Contract Security Analysis</h2>
+                <p>Paste your Solidity smart contract below to get instant security analysis. Detect critical vulnerabilities before deployment.</p>
+            </div>
+
+            <div class="auditor-grid">
+                <div class="editor-panel">
+                    <div class="panel-header">
+                        <span class="panel-title">📝 Smart Contract Code</span>
+                        <button class="analyze-btn" id="analyzeBtn" onclick="analyzeContract()">
+                            Analyze Contract
+                        </button>
+                    </div>
+                    <textarea
+                        class="code-editor"
+                        id="codeEditor"
+                        placeholder="// SPDX-License-Identifier: MIT
+pragma solidity ^0.8.0;
+
+contract YourContract {
+    // Paste your Solidity code here...
+}"
+                    ></textarea>
+                </div>
+
+                <div class="results-panel">
+                    <div class="panel-header">
+                        <span class="panel-title">🔍 Analysis Results</span>
+                    </div>
+                    <div class="results-container" id="resultsContainer">
+                        <div class="empty-state">
+                            <div class="empty-state-icon">🔒</div>
+                            <h3>No Analysis Yet</h3>
+                            <p>Paste your smart contract code and click "Analyze Contract" to begin security analysis.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="examples-section">
+                <h3>Try Example Vulnerable Contracts</h3>
+                <p style="color: var(--text-secondary); margin-bottom: 1rem;">
+                    Click any example below to load a contract with known vulnerabilities
+                </p>
+                <div class="example-buttons">
+                    <button class="example-btn" onclick="loadExample('reentrancy')">Reentrancy Attack</button>
+                    <button class="example-btn" onclick="loadExample('accessControl')">Access Control Issue</button>
+                    <button class="example-btn" onclick="loadExample('uncheckedCall')">Unchecked External Call</button>
+                    <button class="example-btn" onclick="loadExample('txOrigin')">tx.origin Authentication</button>
+                    <button class="example-btn" onclick="loadExample('delegatecall')">Unsafe Delegatecall</button>
+                    <button class="example-btn" onclick="loadExample('selfdestruct')">Unprotected Selfdestruct</button>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <footer class="footer">
+        <p>Built by Chris Nwasike | Open Source Smart Contract Security Tool</p>
+        <p style="margin-top: 0.5rem; font-size: 0.875rem;">
+            This tool provides automated analysis and should not replace professional audits for production contracts.
+        </p>
+    </footer>
+
+    <script>
+        // Vulnerability detection patterns and analysis engine
+        const vulnerabilityPatterns = {
+            // CRITICAL SEVERITY
+            reentrancy: {
+                severity: 'critical',
+                title: 'Reentrancy Vulnerability',
+                pattern: /\.call\{value:\s*\w+\}|\.call\.value\(|\.transfer\(|\.send\(/,
+                checkFunction: (code) => {
+                    const lines = code.split('\n');
+                    const findings = [];
+
+                    lines.forEach((line, idx) => {
+                        const trimmed = line.trim();
+
+                        // Check for call before state update pattern
+                        if (trimmed.match(/\.call\{value:|\.call\.value\(|\.transfer\(|\.send\(/)) {
+                            // Look ahead for state changes
+                            const codeAfter = lines.slice(idx + 1, idx + 5).join('\n');
+                            const hasStateChangeAfter = codeAfter.match(/\w+\s*=|balances\[|\.push\(|\.pop\(|delete\s+/);
+
+                            if (hasStateChangeAfter) {
+                                findings.push({
+                                    line: idx + 1,
+                                    code: trimmed,
+                                    description: 'External call detected before state change. This creates a reentrancy vulnerability where the called contract can call back into this function before state is updated.',
+                                    recommendation: 'Follow the Checks-Effects-Interactions pattern: Update all state variables before making external calls. Consider using ReentrancyGuard from OpenZeppelin.'
+                                });
+                            }
+                        }
+                    });
+
+                    return findings;
+                },
+                description: 'Contract is vulnerable to reentrancy attacks',
+                recommendation: 'Use the Checks-Effects-Interactions pattern and consider OpenZeppelin\'s ReentrancyGuard'
+            },
+
+            unprotectedSelfdestruct: {
+                severity: 'critical',
+                title: 'Unprotected Selfdestruct',
+                checkFunction: (code) => {
+                    const lines = code.split('\n');
+                    const findings = [];
+
+                    lines.forEach((line, idx) => {
+                        if (line.match(/selfdestruct\s*\(/)) {
+                            // Check if function has access control
+                            const functionStart = lines.slice(Math.max(0, idx - 10), idx).join('\n');
+                            const hasModifier = functionStart.match(/\b(onlyOwner|onlyAdmin|require\s*\(\s*msg\.sender\s*==|modifier)\b/);
+
+                            if (!hasModifier) {
+                                findings.push({
+                                    line: idx + 1,
+                                    code: line.trim(),
+                                    description: 'Selfdestruct found without proper access control. Anyone can destroy this contract and steal all funds.',
+                                    recommendation: 'Add onlyOwner or similar access control modifier to functions containing selfdestruct.'
+                                });
+                            }
+                        }
+                    });
+
+                    return findings;
+                },
+                description: 'Selfdestruct function is not properly protected',
+                recommendation: 'Add access control modifiers to selfdestruct functions'
+            },
+
+            delegatecallUntrusted: {
+                severity: 'critical',
+                title: 'Delegatecall to Untrusted Contract',
+                checkFunction: (code) => {
+                    const lines = code.split('\n');
+                    const findings = [];
+
+                    lines.forEach((line, idx) => {
+                        if (line.match(/\.delegatecall\(/)) {
+                            // Check if delegatecall target is user-controlled
+                            const hasUserInput = line.match(/msg\.data|_\w+|calldata/);
+
+                            if (hasUserInput || !line.match(/constant|immutable/)) {
+                                findings.push({
+                                    line: idx + 1,
+                                    code: line.trim(),
+                                    description: 'Delegatecall to potentially untrusted contract. This allows the called contract to modify this contract\'s storage, potentially taking over the contract completely.',
+                                    recommendation: 'Only delegatecall to trusted, immutable contract addresses. Avoid user-controlled delegatecall targets.'
+                                });
+                            }
+                        }
+                    });
+
+                    return findings;
+                },
+                description: 'Delegatecall used with untrusted addresses',
+                recommendation: 'Only delegatecall to trusted addresses'
+            },
+
+            // HIGH SEVERITY
+            txOriginAuth: {
+                severity: 'high',
+                title: 'tx.origin Used for Authorization',
+                checkFunction: (code) => {
+                    const lines = code.split('\n');
+                    const findings = [];
+
+                    lines.forEach((line, idx) => {
+                        if (line.match(/tx\.origin/)) {
+                            const isAuthCheck = line.match(/require\s*\(.*tx\.origin|if\s*\(.*tx\.origin.*==|modifier.*tx\.origin/);
+
+                            if (isAuthCheck) {
+                                findings.push({
+                                    line: idx + 1,
+                                    code: line.trim(),
+                                    description: 'tx.origin used for authorization. This is vulnerable to phishing attacks where a malicious contract tricks a user into calling it.',
+                                    recommendation: 'Use msg.sender instead of tx.origin for authorization checks.'
+                                });
+                            }
+                        }
+                    });
+
+                    return findings;
+                },
+                description: 'Authorization using tx.origin instead of msg.sender',
+                recommendation: 'Use msg.sender for authorization checks'
+            },
+
+            uncheckedExternalCall: {
+                severity: 'high',
+                title: 'Unchecked External Call',
+                checkFunction: (code) => {
+                    const lines = code.split('\n');
+                    const findings = [];
+
+                    lines.forEach((line, idx) => {
+                        const trimmed = line.trim();
+
+                        // Check for .call, .send without checking return value
+                        if (trimmed.match(/\.call\{|\.send\(/)) {
+                            // Check if return value is checked
+                            const hasReturnCheck = trimmed.match(/\(bool\s+\w+,|bool\s+\w+\s*=|require\s*\(.*\.call|if\s*\(/);
+
+                            if (!hasReturnCheck && !trimmed.includes('//')) {
+                                findings.push({
+                                    line: idx + 1,
+                                    code: trimmed,
+                                    description: 'External call return value not checked. Failed calls will silently continue, potentially leading to loss of funds or incorrect state.',
+                                    recommendation: 'Always check return values: (bool success, ) = addr.call{value: amount}(""); require(success, "Call failed");'
+                                });
+                            }
+                        }
+                    });
+
+                    return findings;
+                },
+                description: 'External call made without checking return value',
+                recommendation: 'Always check return values of external calls'
+            },
+
+            accessControlMissing: {
+                severity: 'high',
+                title: 'Missing Access Control',
+                checkFunction: (code) => {
+                    const lines = code.split('\n');
+                    const findings = [];
+                    let inFunction = false;
+                    let functionName = '';
+                    let functionVisibility = '';
+                    let functionStart = 0;
+
+                    lines.forEach((line, idx) => {
+                        const trimmed = line.trim();
+
+                        // Detect function start
+                        const functionMatch = trimmed.match(/function\s+(\w+)\s*\([^)]*\)\s*(public|external)?/);
+                        if (functionMatch) {
+                            inFunction = true;
+                            functionName = functionMatch[1];
+                            functionVisibility = functionMatch[2] || '';
+                            functionStart = idx;
+                        }
+
+                        // Check for sensitive operations
+                        if (inFunction && (functionVisibility === 'public' || functionVisibility === 'external')) {
+                            const hasSensitiveOp = trimmed.match(/selfdestruct|suicide|delegatecall|\.transfer\(|\.send\(|\.call\{value/);
+                            const hasModifier = lines[functionStart].match(/\bonlyOwner\b|\bonlyAdmin\b|\brequire\s*\(\s*msg\.sender/);
+
+                            if (hasSensitiveOp && !hasModifier) {
+                                findings.push({
+                                    line: functionStart + 1,
+                                    code: lines[functionStart].trim(),
+                                    description: `Function '${functionName}' performs sensitive operations but lacks access control. Anyone can call this function.`,
+                                    recommendation: 'Add access control modifiers (onlyOwner, onlyRole, etc.) to restrict who can call this function.'
+                                });
+                                inFunction = false; // Only report once per function
+                            }
+                        }
+
+                        // Detect function end
+                        if (trimmed === '}') {
+                            inFunction = false;
+                        }
+                    });
+
+                    return findings;
+                },
+                description: 'Sensitive functions lack proper access control',
+                recommendation: 'Add access control modifiers to sensitive functions'
+            },
+
+            integerOverflow: {
+                severity: 'high',
+                title: 'Potential Integer Overflow/Underflow',
+                checkFunction: (code) => {
+                    const findings = [];
+
+                    // Check Solidity version
+                    const versionMatch = code.match(/pragma\s+solidity\s+[\^<>=]*(\d+\.\d+)/);
+                    if (versionMatch) {
+                        const version = parseFloat(versionMatch[1]);
+
+                        if (version < 0.8) {
+                            const lines = code.split('\n');
+                            const hasSafeMath = code.includes('SafeMath');
+
+                            if (!hasSafeMath) {
+                                lines.forEach((line, idx) => {
+                                    if (line.match(/\+\+|--|[\+\-\*]\s*=/)) {
+                                        findings.push({
+                                            line: idx + 1,
+                                            code: line.trim(),
+                                            description: 'Using Solidity < 0.8.0 without SafeMath. Integer overflow/underflow can occur.',
+                                            recommendation: 'Upgrade to Solidity 0.8.0+ or use OpenZeppelin SafeMath library.'
+                                        });
+                                    }
+                                });
+                            }
+                        }
+                    }
+
+                    return findings;
+                },
+                description: 'Potential integer overflow/underflow',
+                recommendation: 'Use Solidity 0.8.0+ or SafeMath library'
+            },
+
+            timestampDependence: {
+                severity: 'high',
+                title: 'Block Timestamp Manipulation',
+                checkFunction: (code) => {
+                    const lines = code.split('\n');
+                    const findings = [];
+
+                    lines.forEach((line, idx) => {
+                        if (line.match(/block\.timestamp|now\b/)) {
+                            const isCritical = line.match(/require|if|randomness|seed/);
+
+                            if (isCritical) {
+                                findings.push({
+                                    line: idx + 1,
+                                    code: line.trim(),
+                                    description: 'Block timestamp used in critical logic. Miners can manipulate timestamps by ~15 seconds.',
+                                    recommendation: 'Avoid using block.timestamp for critical logic. Use block.number for time-based logic when possible, or accept the manipulation window.'
+                                });
+                            }
+                        }
+                    });
+
+                    return findings;
+                },
+                description: 'Block timestamp used in critical operations',
+                recommendation: 'Avoid timestamp dependence for critical logic'
+            },
+
+            uninitializedStorage: {
+                severity: 'high',
+                title: 'Uninitialized Storage Pointer',
+                checkFunction: (code) => {
+                    const lines = code.split('\n');
+                    const findings = [];
+
+                    lines.forEach((line, idx) => {
+                        // Look for struct declarations without storage/memory keyword (pre-0.5.0 issue)
+                        const structMatch = line.match(/\b(\w+)\s+(\w+)\s*;/);
+                        if (structMatch && !line.match(/memory|storage|calldata/) && !line.match(/uint|int|bool|address|string/)) {
+                            findings.push({
+                                line: idx + 1,
+                                code: line.trim(),
+                                description: 'Potential uninitialized storage pointer. This can overwrite critical storage slots.',
+                                recommendation: 'Always specify memory or storage for complex types. Upgrade to Solidity 0.5.0+.'
+                            });
+                        }
+                    });
+
+                    return findings;
+                },
+                description: 'Uninitialized storage pointers detected',
+                recommendation: 'Specify storage/memory explicitly'
+            },
+
+            frontRunning: {
+                severity: 'high',
+                title: 'Front-Running Vulnerability',
+                checkFunction: (code) => {
+                    const lines = code.split('\n');
+                    const findings = [];
+
+                    lines.forEach((line, idx) => {
+                        // Look for patterns that might be vulnerable to front-running
+                        if (line.match(/function\s+\w+.*public|function\s+\w+.*external/)) {
+                            const functionBlock = lines.slice(idx, idx + 20).join('\n');
+
+                            // Check for price/value dependent operations
+                            if (functionBlock.match(/price|rate|amount.*msg\.value|swap|exchange/)) {
+                                const hasSlippage = functionBlock.match(/minAmount|maxPrice|deadline|slippage/);
+
+                                if (!hasSlippage) {
+                                    findings.push({
+                                        line: idx + 1,
+                                        code: line.trim(),
+                                        description: 'Function vulnerable to front-running. Transactions can be observed and exploited before execution.',
+                                        recommendation: 'Implement slippage protection (minAmount, maxPrice, deadline) or use commit-reveal schemes.'
+                                    });
+                                }
+                            }
+                        }
+                    });
+
+                    return findings;
+                },
+                description: 'Transaction ordering dependence detected',
+                recommendation: 'Implement slippage protection or commit-reveal'
+            },
+
+            // Additional patterns
+            unsafeTransfer: {
+                severity: 'high',
+                title: 'Unsafe ERC20 Transfer',
+                checkFunction: (code) => {
+                    const lines = code.split('\n');
+                    const findings = [];
+
+                    lines.forEach((line, idx) => {
+                        if (line.match(/\.transfer\(/) && line.match(/ERC20|token/i)) {
+                            const hasReturnCheck = line.match(/require\s*\(.*\.transfer|bool.*=.*\.transfer/);
+
+                            if (!hasReturnCheck) {
+                                findings.push({
+                                    line: idx + 1,
+                                    code: line.trim(),
+                                    description: 'ERC20 transfer without checking return value. Some tokens return false on failure instead of reverting.',
+                                    recommendation: 'Use OpenZeppelin SafeERC20 library or check return value: require(token.transfer(...), "Transfer failed");'
+                                });
+                            }
+                        }
+                    });
+
+                    return findings;
+                },
+                description: 'ERC20 operations without proper checks',
+                recommendation: 'Use SafeERC20 library'
+            }
+        };
+
+        function analyzeContract() {
+            const code = document.getElementById('codeEditor').value;
+            const resultsContainer = document.getElementById('resultsContainer');
+            const analyzeBtn = document.getElementById('analyzeBtn');
+
+            if (!code.trim()) {
+                alert('Please paste some Solidity code to analyze');
+                return;
+            }
+
+            // Show loading state
+            analyzeBtn.disabled = true;
+            analyzeBtn.innerHTML = '<span class="loader"></span> Analyzing...';
+
+            // Simulate analysis delay for better UX
+            setTimeout(() => {
+                const findings = [];
+
+                // Run all vulnerability checks
+                Object.entries(vulnerabilityPatterns).forEach(([key, pattern]) => {
+                    if (pattern.checkFunction) {
+                        const results = pattern.checkFunction(code);
+                        results.forEach(result => {
+                            findings.push({
+                                severity: pattern.severity,
+                                title: pattern.title,
+                                ...result
+                            });
+                        });
+                    }
+                });
+
+                // Display results
+                displayResults(findings);
+
+                // Reset button
+                analyzeBtn.disabled = false;
+                analyzeBtn.textContent = 'Analyze Contract';
+            }, 1000);
+        }
+
+        function displayResults(findings) {
+            const resultsContainer = document.getElementById('resultsContainer');
+
+            if (findings.length === 0) {
+                resultsContainer.innerHTML = `
+                    <div class="empty-state">
+                        <div class="empty-state-icon">✅</div>
+                        <h3>No Critical or High Severity Issues Found</h3>
+                        <p>This automated analysis did not detect critical vulnerabilities. However, always get a professional audit for production contracts.</p>
+                    </div>
+                `;
+                return;
+            }
+
+            // Count by severity
+            const counts = {
+                critical: findings.filter(f => f.severity === 'critical').length,
+                high: findings.filter(f => f.severity === 'high').length,
+                medium: findings.filter(f => f.severity === 'medium').length,
+                low: findings.filter(f => f.severity === 'low').length
+            };
+
+            // Sort by severity
+            const severityOrder = { critical: 0, high: 1, medium: 2, low: 3 };
+            findings.sort((a, b) => severityOrder[a.severity] - severityOrder[b.severity]);
+
+            let html = `
+                <div class="summary-cards">
+                    <div class="summary-card critical">
+                        <h3>${counts.critical}</h3>
+                        <p>Critical Issues</p>
+                    </div>
+                    <div class="summary-card high">
+                        <h3>${counts.high}</h3>
+                        <p>High Issues</p>
+                    </div>
+                    <div class="summary-card medium">
+                        <h3>${counts.medium}</h3>
+                        <p>Medium Issues</p>
+                    </div>
+                    <div class="summary-card low">
+                        <h3>${counts.low}</h3>
+                        <p>Low Issues</p>
+                    </div>
+                </div>
+            `;
+
+            findings.forEach((finding, index) => {
+                html += `
+                    <div class="finding ${finding.severity}">
+                        <div class="finding-header">
+                            <div>
+                                <div class="finding-title">${finding.title}</div>
+                                ${finding.line ? `<span class="line-number">Line ${finding.line}</span>` : ''}
+                            </div>
+                            <span class="severity-badge ${finding.severity}">${finding.severity}</span>
+                        </div>
+                        <div class="finding-description">${finding.description}</div>
+                        ${finding.code ? `<div class="code-snippet"><code>${escapeHtml(finding.code)}</code></div>` : ''}
+                        <div class="recommendation">
+                            <strong>💡 Recommendation:</strong>
+                            ${finding.recommendation}
+                        </div>
+                    </div>
+                `;
+            });
+
+            resultsContainer.innerHTML = html;
+        }
+
+        function escapeHtml(text) {
+            const div = document.createElement('div');
+            div.textContent = text;
+            return div.innerHTML;
+        }
+
+        // Example vulnerable contracts
+        const examples = {
+            reentrancy: `// SPDX-License-Identifier: MIT
+pragma solidity ^0.8.0;
+
+contract VulnerableBank {
+    mapping(address => uint256) public balances;
+
+    function deposit() public payable {
+        balances[msg.sender] += msg.value;
+    }
+
+    // VULNERABLE: Reentrancy attack possible
+    function withdraw(uint256 amount) public {
+        require(balances[msg.sender] >= amount, "Insufficient balance");
+
+        // External call BEFORE state update
+        (bool success, ) = msg.sender.call{value: amount}("");
+        require(success, "Transfer failed");
+
+        // State updated AFTER external call - DANGEROUS!
+        balances[msg.sender] -= amount;
+    }
+}`,
+
+            accessControl: `// SPDX-License-Identifier: MIT
+pragma solidity ^0.8.0;
+
+contract VulnerableWallet {
+    address public owner;
+
+    constructor() {
+        owner = msg.sender;
+    }
+
+    // VULNERABLE: No access control on critical function
+    function withdraw(uint256 amount) public {
+        payable(msg.sender).transfer(amount);
+    }
+
+    // VULNERABLE: Anyone can destroy the contract
+    function destroy() public {
+        selfdestruct(payable(msg.sender));
+    }
+
+    receive() external payable {}
+}`,
+
+            uncheckedCall: `// SPDX-License-Identifier: MIT
+pragma solidity ^0.8.0;
+
+contract UncheckedSends {
+    mapping(address => uint256) public balances;
+
+    function withdraw() public {
+        uint256 amount = balances[msg.sender];
+        balances[msg.sender] = 0;
+
+        // VULNERABLE: Return value not checked
+        payable(msg.sender).send(amount);
+    }
+
+    function transfer(address to, uint256 amount) public {
+        require(balances[msg.sender] >= amount);
+
+        // VULNERABLE: Call return value ignored
+        to.call{value: amount}("");
+
+        balances[msg.sender] -= amount;
+    }
+}`,
+
+            txOrigin: `// SPDX-License-Identifier: MIT
+pragma solidity ^0.8.0;
+
+contract PhishableWallet {
+    address public owner;
+
+    constructor() {
+        owner = msg.sender;
+    }
+
+    // VULNERABLE: Using tx.origin for auth
+    function transfer(address payable to, uint256 amount) public {
+        require(tx.origin == owner, "Not owner");
+        to.transfer(amount);
+    }
+
+    receive() external payable {}
+}`,
+
+            delegatecall: `// SPDX-License-Identifier: MIT
+pragma solidity ^0.8.0;
+
+contract UnsafeDelegateCall {
+    address public implementation;
+    address public owner;
+
+    constructor() {
+        owner = msg.sender;
+    }
+
+    // VULNERABLE: Delegatecall to user-controlled address
+    function execute(address target, bytes calldata data) public {
+        target.delegatecall(data);
+    }
+
+    function setImplementation(address _impl) public {
+        implementation = _impl;
+    }
+}`,
+
+            selfdestruct: `// SPDX-License-Identifier: MIT
+pragma solidity ^0.8.0;
+
+contract SelfDestructable {
+    address public owner;
+
+    constructor() {
+        owner = msg.sender;
+    }
+
+    // VULNERABLE: No access control
+    function kill(address payable to) public {
+        selfdestruct(to);
+    }
+
+    receive() external payable {}
+}`
+        };
+
+        function loadExample(exampleName) {
+            const code = examples[exampleName];
+            if (code) {
+                document.getElementById('codeEditor').value = code;
+                // Auto-analyze after loading
+                setTimeout(() => analyzeContract(), 500);
+            }
+        }
+
+        // Allow Ctrl+Enter to analyze
+        document.getElementById('codeEditor').addEventListener('keydown', (e) => {
+            if (e.ctrlKey && e.key === 'Enter') {
+                analyzeContract();
+            }
+        });
+    </script>
+</body>
+</html>
